@@ -1,0 +1,3 @@
+[submodule "fpc-zmq"]
+	path = fpc-zmq
+	url = https://github.com/cpicanco/fpc-zmq
