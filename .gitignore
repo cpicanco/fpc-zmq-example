@@ -23,6 +23,7 @@ core
 *.rst
 *.~*~
 *~
+
 __history
 backup/*
 lib/*
