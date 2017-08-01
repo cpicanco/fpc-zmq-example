@@ -8,8 +8,6 @@ program hwserver;
 
 {$mode objfpc}{$H+}
 
-// PACKSET 1
-
 uses sysutils, zmq;
 
 var
@@ -17,7 +15,7 @@ var
   rc : integer = 0;
 
   buffer : array [0..9] of Char;
-  S : string = 'World';
+  S : array [0..4] of Char = 'World';
 begin
   //  Socket to talk to clients
   context := zmq_ctx_new;
@@ -27,8 +25,8 @@ begin
 
   while True do
     begin
-      zmq_recv(responder, @buffer, 10, 0);
-      Writeln('Received Hello');
+      zmq_recv(responder, @buffer, SizeOf(buffer), 0);
+      Writeln('Received ', buffer);
       Sleep(1000); //  Do some 'work'
       zmq_send(responder, @S, Length(S), 0);
     end;
