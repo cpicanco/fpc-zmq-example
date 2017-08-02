@@ -6,15 +6,12 @@
 }
 program hwserver;
 
-{$mode objfpc}{$H+}
-
 uses sysutils, zmq;
 
 var
   context, responder: Pointer;
   rc : integer = 0;
-
-  buffer : array [0..9] of Char;
+  buffer : array [0..4] of Char;
   S : array [0..4] of Char = 'World';
 begin
   //  Socket to talk to clients
@@ -22,13 +19,13 @@ begin
   responder := zmq_socket(context, ZMQ_REP);
   rc := zmq_bind(responder, 'tcp://*:5555');
   Assert(rc = 0);
-
+  WriteLn('hello world server initialized…');
   while True do
     begin
       zmq_recv(responder, @buffer, SizeOf(buffer), 0);
       Writeln('Received ', buffer);
       Sleep(1000); //  Do some 'work'
-      zmq_send(responder, @S, Length(S), 0);
+      WriteLn('Sending '+S+'…');
+      zmq_send(responder, @S, SizeOf(S), 0);
     end;
 end.
-
