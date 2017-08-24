@@ -29,7 +29,7 @@ begin
   zmq_connect(sink, 'tcp://localhost:5558');
 
   WriteLn('Press Enter when the workers are ready: ');
-  Read;
+  ReadLn;
   WriteLn('Sending tasks to workers…');
 
   //  The first message is "0" and signals start of batch
