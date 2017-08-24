@@ -38,14 +38,14 @@ begin
       Write(':')
     else
       Write('.');
-    Flush(output);
+    // Flush(output);
   end;
 
   //  Calculate and report duration of batch
-  WriteLn('Total elapsed time: %d msec',
-    (GettickCount64 - start_time));
+  WriteLn(Format('Total elapsed time: %d msec',
+    [GettickCount64 - start_time]));
 
   zmq_close(receiver);
-  zmq_ctx_destroy (context);
+  zmq_ctx_destroy(context);
 end.
 

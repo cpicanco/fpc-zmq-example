@@ -26,18 +26,17 @@ begin
   zmq_connect(sender, 'tcp://localhost:5558');
 
   //  Process tasks forever
-  while True do
-  begin
+  repeat
     LString := s_recv(receiver);
-    Write('%s.', LString);     //  Show progress
-    Flush(output);
+    Write(LString+'.');     //  Show progress
+    // Flush(output);
     Sleep(StrToInt(LString));  //  Do the work
     LString := '';
     s_send(sender, '');        //  Send results to sink
-  end;
+  until False;
 
   zmq_close(receiver);
   zmq_close(sender);
-  zmq_ctx_destroy (context);
+  zmq_ctx_destroy(context);
 end.
 

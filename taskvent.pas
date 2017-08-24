@@ -6,6 +6,8 @@
 }
 program taskvent;
 
+{$MODE objfpc}{$H+}{$COPERATORS ON}
+
 uses SysUtils, zmq, zmq.helpers;
 
 var
@@ -14,7 +16,7 @@ var
   total_msec : integer = 0; //  Total expected cost in msecs
   workload : integer;
 
-  LString : string[10];
+  LString : string;
 begin
   context := zmq_ctx_new;
 
@@ -42,7 +44,7 @@ begin
       //  Random workload from 1 to 100msecs
       workload := randof(100) + 1;
       total_msec += workload;
-      WriteStr(LString, Format('%d', [workload]));
+      LString := IntToStr(workload);
       s_send(sender, LString);
     end;
 
