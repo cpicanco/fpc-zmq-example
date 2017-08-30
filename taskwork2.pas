@@ -8,56 +8,48 @@ program taskwork2;
 {$mode objfpc}{$H+}
 
 uses SysUtils, zmq, zmq.helpers;
-const
-  forever = False;
 
 var
-  context, receiver, sender, controller: Pointer;
-  items : array [0..1] of zmq_pollitem_t;
+  context, receiver, controller: Pointer;
   LString : string;
-  optval : string = '';
+  task_nbr: Integer;
+  start_time: QWord;
 begin
+  //  Socket to receive messages on
+  context := zmq_ctx_new;
+  receiver := zmq_socket(context, ZMQ_PULL);
+  zmq_bind(receiver, 'tcp://*:5558');
 
+  //  Socket for worker control
+  controller := zmq_socket(context, ZMQ_PUB);
+  zmq_bind(controller, 'tcp://*:5559');
 
+  //  Wait for start of batch
+  LString := s_recv(receiver);
+  LString := '';
 
-  #include "zhelpers.h"
+  //  Start our clock now
+  start_time := GetTickCount64;
 
-  int main (void)
-  {
-      //  Socket to receive messages on
-      void *context = zmq_ctx_new ();
-      void *receiver = zmq_socket (context, ZMQ_PULL);
-      zmq_bind (receiver, "tcp://*:5558");
+  //  Process 100 confirmations
+  task_nbr := 0;
+  for task_nbr := 0 to 99 do
+  begin
+    LString := s_recv(receiver);
+    LString := '';
+    if ((task_nbr mod 10) = 0) then
+      WriteLn(':')
+    else
+      WriteLn('.');
+    //Flush(StdOut);
+  end;
+  WriteLn(Format('Total elapsed time: %d msec',
+    [GetTickCount64 - start_time]));
 
-      //  Socket for worker control
-      void *controller = zmq_socket (context, ZMQ_PUB);
-      zmq_bind (controller, "tcp://*:5559");
+  //  Send kill signal to workers
+  s_send(controller, 'KILL');
 
-      //  Wait for start of batch
-      char *string = s_recv (receiver);
-      free (string);
-
-      //  Start our clock now
-      int64_t start_time = s_clock ();
-
-      //  Process 100 confirmations
-      int task_nbr;
-      for (task_nbr = 0; task_nbr < 100; task_nbr++) {
-          char *string = s_recv (receiver);
-          free (string);
-          if (task_nbr % 10 == 0)
-              printf (":");
-          else
-              printf (".");
-          fflush (stdout);
-      }
-      printf ("Total elapsed time: %d msec\n",
-          (int) (s_clock () - start_time));
-
-      //  Send kill signal to workers
-      s_send (controller, "KILL");
-
-      zmq_close (receiver);
-      zmq_close (controller);
-      zmq_ctx_destroy (context);
+  zmq_close(receiver);
+  zmq_close(controller);
+  zmq_ctx_destroy(context);
 end.
